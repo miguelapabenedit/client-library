@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"math"
-	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -22,14 +21,16 @@ const (
 	jsonContentType   = "application/json"
 )
 
-type Doer interface
+// Doer provides the main intention to send an HTTP request and returns an HTTP response
+// client. A mock library can be found under the file ./mocks with an implementation of
+// a ClientOption configuration.
+type Doer interface {
+	Do(client http.Client, req *http.Request) (resp *http.Response, err error)
+}
 
 type Client struct {
-	client         http.Client
-
-	retryAttempts  int
-	backoffIntvl   int
-	maxJitterIntvl int
+	client http.Client
+	doer   Doer
 }
 
 func NewClient(options ...ClientOption) Client {
@@ -47,6 +48,7 @@ func NewClient(options ...ClientOption) Client {
 	for _, option := range options {
 		c = option(c)
 	}
+
 	return c
 }
 
@@ -56,7 +58,12 @@ func (c *Client) Fetch(ctx context.Context, id string) (Account, error) {
 	}
 
 	path := fmt.Sprintf("%s/%s", baseURL, id)
-	resp, err := c.do(ctx, http.MethodGet, path, nil)
+	req, err := makeJSONRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return Account{}, err
+	}
+
+	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
 		return Account{}, err
 	}
@@ -79,7 +86,12 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	}
 
 	path := fmt.Sprintf("%s/%s?version=0", baseURL, id)
-	resp, err := c.do(ctx, http.MethodDelete, path, nil)
+	req, err := makeJSONRequest(http.MethodDelete, path, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
 		return err
 	}
@@ -91,17 +103,15 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func containsOnlyBlanks(value string) bool {
-	return len(strings.TrimSpace(value)) == 0
-}
-
 func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, error) {
-	content, err := json.Marshal(CreateAccountRequest{account})
+	req, err := makeJSONRequest(http.MethodPost, baseURL, account)
 	if err != nil {
-		return Account{}, ErrSerializeRequest
+		return Account{}, err
 	}
 
-	resp, err := c.do(ctx, http.MethodPost, baseURL, bytes.NewReader(content))
+	req.Header.Add(contentTypeHeader, jsonContentType)
+
+	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
 		return Account{}, err
 	}
@@ -118,34 +128,8 @@ func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, e
 	return rData.Account, nil
 }
 
-func (c *Client) do(ctx context.Context, method string, path string, body io.Reader) (resp *http.Response, err error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, body)
-	if err != nil {
-		return resp, err
-	}
-
-	if body != nil {
-		req.Header.Add(contentTypeHeader, jsonContentType)
-	}
-
-	retries := 0
-	for ; retries <= c.retryAttempts; retries++ {
-		if retries > 0 {
-			backoffIntvl := int(float64(c.backoffIntvl)*math.Exp2(float64(retries))) + rand.Intn(c.maxJitterIntvl)
-			time.Sleep(time.Duration(float64(backoffIntvl)))
-		}
-
-		resp, err = c.client.Do(req)
-		if err == nil {
-			break
-		}
-	}
-
-	if retries >= c.retryAttempts {
-		return resp, ErrRetryRequest
-	}
-
-	return resp, err
+func containsOnlyBlanks(value string) bool {
+	return len(strings.TrimSpace(value)) == 0
 }
 
 func normalizeResponseError(resp *http.Response) error {
@@ -157,23 +141,40 @@ func normalizeResponseError(resp *http.Response) error {
 	switch resp.StatusCode {
 	case http.StatusBadRequest:
 		var (
-			required = strings.Split(respErr.ErrorMessage, "\n")
-			errMsg   bytes.Buffer
+			errors    = strings.Split(respErr.ErrorMessage, "\n")
+			errBuffer bytes.Buffer
 		)
 
-		for _, msg := range required {
-			if !strings.EqualFold(msg, "validation failure list:") {
-				errMsg.WriteString(msg)
-				errMsg.WriteString(";")
+		for _, err := range errors {
+			if !strings.EqualFold(err, "validation failure list:") {
+				errBuffer.WriteString(fmt.Sprintf("%s;", err))
 			}
 		}
-		respErr.ErrorMessage = errMsg.String()
 
+		respErr.ErrorMessage = errBuffer.String()
 	case http.StatusNotFound:
-		respErr.ErrorMessage = ErrRecordNotFound
+		respErr.ErrorMessage = ErrRecordNotFound.Error()
 	}
 
-	return RequestError{ErrorMessage: respErr.ErrorMessage, StatusCode: resp.StatusCode}
+	return RequestError{Err: errors.New(respErr.ErrorMessage), StatusCode: resp.StatusCode}
+}
+
+func makeJSONRequest(method, path string, body interface{}) (*http.Request, error) {
+	content, err := json.Marshal(body)
+	if err != nil {
+		return nil, ErrSerializeRequest
+	}
+
+	req, err := http.NewRequest(method, path, bytes.NewReader(content))
+	if err != nil {
+		return nil, err
+	}
+
+	if body != nil {
+		req.Header.Add(contentTypeHeader, jsonContentType)
+	}
+
+	return req, nil
 }
 
 func unmarshalBody(body io.Reader, v any) error {

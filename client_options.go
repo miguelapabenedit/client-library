@@ -1,12 +1,9 @@
 package form3client
 
 import (
+	"form3-client-library/mocks"
+	"net/http"
 	"time"
-)
-
-const (
-	//Zero specify an empty time.Duration
-	empty = 0
 )
 
 // ClientOption is any function that can work as an option to set Client
@@ -36,25 +33,25 @@ func Timeout(timeout time.Duration) ClientOption {
 // in the presence of an error. This is optional and its default is to
 // not retry.
 //
-// RetryAttempts: type int specifys the amount of retries attempts
+// RetryAttempts: type uint specifys the amount of retries attempts
 //
-// BackoffInterval: type int specifys the behind backoff interval in miliseconds
+// BackoffInterval: type uint specifys the behind backoff interval in miliseconds
 // and is to use progressively exponential longer waits between retries for consecutive error responses
 //
-// MaximumJitterInterval: type int specifys the maximum jitter interval (randomized delay) in miliseconds to prevent successive collisions
+// MaximumJitterInterval: type uint specifys the maximum jitter interval (randomized delay) in miliseconds to prevent successive collisions
 // use in the exponential backoff interval algorithm
 //
 // Retries is consider default if any of the params is set to its zero/empty value, so it will not retry
-func Retries(retryAttempts, backoffIntvl, maxJitterIntvl int) ClientOption {
+func Retries(retryAttempts, backoffIntvl, maxJitterIntvl uint) ClientOption {
 	return func(c Client) Client {
-		if retryAttempts < 1 || maxJitterIntvl <= empty || backoffIntvl <= empty {
-			retryAttempts = 0
-		}
+		c.doer = NewRetryDoer(retryAttempts, backoffIntvl, maxJitterIntvl)
+		return c
+	}
+}
 
-		c.retryAttempts = retryAttempts
-		c.backoffIntvl = backoffIntvl
-		c.maxJitterIntvl = maxJitterIntvl
-
+func MockDoer(retryMockFn func(client http.Client, req *http.Request) (resp *http.Response, err error)) ClientOption {
+	return func(c Client) Client {
+		c.doer = mocks.NewDoerMock(retryMockFn)
 		return c
 	}
 }
