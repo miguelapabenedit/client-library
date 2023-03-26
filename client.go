@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,18 +20,31 @@ const (
 	jsonContentType   = "application/json"
 )
 
-// Doer provides the main intention to send an HTTP request and returns an HTTP response
+// Doer provides the main interface to send an HTTP request and returns an HTTP response
 // client. A mock library can be found under the file ./mocks with an implementation of
 // a ClientOption configuration.
 type Doer interface {
 	Do(client http.Client, req *http.Request) (resp *http.Response, err error)
 }
 
+// Client implements a simple wrapper around the Go standard package
+// http.Client.
+//
+// To use it, create an instance with NewClient, the zero value of this Client
+// is not safe to use.
 type Client struct {
 	client http.Client
 	doer   Doer
 }
 
+// NewClient is the only way to properly instantiate a Form3 Client.
+//
+// The NewClient feature accepts ClientOptions that will allow
+// the proper setting of the client configurations. For more
+// information please visit ./client_options file.
+//
+// Default settings will be applied if no options are injected, and
+// only does selected will be applied leaving the rest as default.
 func NewClient(options ...ClientOption) Client {
 	c := Client{
 		client: http.Client{},
@@ -52,6 +64,17 @@ func NewClient(options ...ClientOption) Client {
 	return c
 }
 
+// Fetch allows to retrieve an account resource by its identifier providing:
+//
+// ctx (context.Context) context carries a deadline, a cancellation signal, and other values across API boundaries.
+//
+// id  (string) identifier of the Form3 account to fetch.
+//
+// If no id is provided RequestErr with the ErrRequiredID is returned and it can't
+// contain only blanks.
+//
+// Errors related to the request or resource trying to be obtained will be of type
+// RequestError, while server side errors will be of type error.
 func (c *Client) Fetch(ctx context.Context, id string) (Account, error) {
 	if containsOnlyBlanks(id) {
 		return Account{}, ErrRequiredID
@@ -65,11 +88,11 @@ func (c *Client) Fetch(ctx context.Context, id string) (Account, error) {
 
 	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
-		return Account{}, err
+		return Account{}, handleClientError(err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return Account{}, normalizeResponseError(resp)
+		return Account{}, handleResponseError(resp)
 	}
 
 	var rData AccountResponse
@@ -80,6 +103,17 @@ func (c *Client) Fetch(ctx context.Context, id string) (Account, error) {
 	return rData.Account, nil
 }
 
+// Delete allows to remove an account by its identifier providing:
+//
+// ctx (context.Context) context carries a deadline, a cancellation signal, and other values across API boundaries.
+//
+// id  (string) identifier of the Form3 account to delete.
+//
+// If no id is provided RequestErr with the ErrRequiredID is returned and it can't
+// contain only blanks.
+//
+// Errors related to the request or resource trying to be deleted will be of type
+// RequestError, while server side errors will be of type error.
 func (c *Client) Delete(ctx context.Context, id string) error {
 	if containsOnlyBlanks(id) {
 		return ErrRequiredID
@@ -93,31 +127,39 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 
 	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
-		return err
+		return handleClientError(err)
 	}
 
 	if resp.StatusCode != http.StatusNoContent {
-		return normalizeResponseError(resp)
+		return handleResponseError(resp)
 	}
 
 	return nil
 }
 
+// Create allows to register a new account resource:
+//
+// ctx (context.Context) context carries a deadline, a cancellation signal, and other values across API boundaries.
+//
+// account  (AccountRequest) account contains the basic and optional data for the register of a new account.
+//
+// If the resource is successfuly created the func will return an (Account) object with the base information.
+//
+// Errors related to the request  will be of type
+// RequestError, while server side errors will be of type error.
 func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, error) {
 	req, err := makeJSONRequest(http.MethodPost, baseURL, account)
 	if err != nil {
 		return Account{}, err
 	}
 
-	req.Header.Add(contentTypeHeader, jsonContentType)
-
 	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
-		return Account{}, err
+		return Account{}, handleClientError(err)
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return Account{}, normalizeResponseError(resp)
+		return Account{}, handleResponseError(resp)
 	}
 
 	var rData AccountResponse
@@ -130,33 +172,6 @@ func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, e
 
 func containsOnlyBlanks(value string) bool {
 	return len(strings.TrimSpace(value)) == 0
-}
-
-func normalizeResponseError(resp *http.Response) error {
-	var respErr ResponseError
-	if err := unmarshalBody(resp.Body, &respErr); err != nil {
-		return err
-	}
-
-	switch resp.StatusCode {
-	case http.StatusBadRequest:
-		var (
-			errors    = strings.Split(respErr.ErrorMessage, "\n")
-			errBuffer bytes.Buffer
-		)
-
-		for _, err := range errors {
-			if !strings.EqualFold(err, "validation failure list:") {
-				errBuffer.WriteString(fmt.Sprintf("%s;", err))
-			}
-		}
-
-		respErr.ErrorMessage = errBuffer.String()
-	case http.StatusNotFound:
-		respErr.ErrorMessage = ErrRecordNotFound.Error()
-	}
-
-	return RequestError{Err: errors.New(respErr.ErrorMessage), StatusCode: resp.StatusCode}
 }
 
 func makeJSONRequest(method, path string, body interface{}) (*http.Request, error) {

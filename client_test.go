@@ -40,10 +40,10 @@ func TestFetch_WhenEmptyIDs_ThenFailsWithBadRequest(t *testing.T) {
 
 func TestFetch_WhenDoError_ThenFailsWithErr(t *testing.T) {
 	var (
-		expErr = "client_do_error"
+		expErr = f3Client.ErrClientInternal
 
 		doerMockFunc = func(client http.Client, req *http.Request) (resp *http.Response, err error) {
-			return nil, errors.New(expErr)
+			return nil, errors.New("client internal error")
 		}
 
 		client = f3Client.NewClient(f3Client.MockDoer(doerMockFunc))
@@ -52,7 +52,7 @@ func TestFetch_WhenDoError_ThenFailsWithErr(t *testing.T) {
 	account, err := client.Fetch(context.Background(), "test-id")
 
 	assert.Equal(t, f3Client.Account{}, account)
-	assert.EqualError(t, err, expErr)
+	assert.EqualError(t, err, expErr.Error())
 }
 
 func TestFetch_WhenRequestAndUnmarshalError_ThenFailsWithNormalizedErr(t *testing.T) {
@@ -191,10 +191,10 @@ func TestDelete_WhenEmptyIDs_ThenFailsWithBadRequest(t *testing.T) {
 
 func TestDelete_WhenDoError_ThenFailsWithErr(t *testing.T) {
 	var (
-		expErr = "client_do_error"
+		expErr = f3Client.ErrClientInternal
 
 		doerMockFunc = func(client http.Client, req *http.Request) (resp *http.Response, err error) {
-			return nil, errors.New(expErr)
+			return nil, errors.New("client internal error")
 		}
 
 		client = f3Client.NewClient(f3Client.MockDoer(doerMockFunc))
@@ -202,7 +202,7 @@ func TestDelete_WhenDoError_ThenFailsWithErr(t *testing.T) {
 
 	err := client.Delete(context.Background(), "test-id")
 
-	assert.EqualError(t, err, expErr)
+	assert.EqualError(t, err, expErr.Error())
 }
 
 func TestDelete_WhenRecordNotFound_ThenFailsWithNormalizedErr(t *testing.T) {
@@ -264,11 +264,11 @@ func TestCreate_WhenDoError_ThenFailsWithErr(t *testing.T) {
 
 		expReqURL  = baseURL
 		expAccount f3Client.Account
-		expErr     = "client_create_err"
+		expErr     = f3Client.ErrClientInternal
 
 		doerMockFunc = func(client http.Client, req *http.Request) (resp *http.Response, err error) {
 			sendReqURL = req.URL.String()
-			return nil, errors.New(expErr)
+			return nil, errors.New("client internal error")
 		}
 
 		c = f3Client.NewClient(f3Client.MockDoer(doerMockFunc))
@@ -278,7 +278,7 @@ func TestCreate_WhenDoError_ThenFailsWithErr(t *testing.T) {
 
 	assert.Equal(t, expReqURL, sendReqURL)
 	assert.Equal(t, expAccount, account)
-	assert.EqualError(t, err, expErr)
+	assert.EqualError(t, err, expErr.Error())
 }
 
 func TestCreate_WhenBadRequest_ThenFailsWithNormalizedErr(t *testing.T) {
@@ -343,7 +343,8 @@ func TestCreate_WhenUnmarshalErr_ThenFailsWithNormalizedErr(t *testing.T) {
 func TestCreate_WhenAccountCreated_ThenSuccess(t *testing.T) {
 	var (
 		sendReqURL string
-		req        = f3Client.AccountRequest{
+
+		req = f3Client.AccountRequest{
 			ID:             uuid.NewString(),
 			OrganisationID: uuid.NewString(),
 			Type:           "accounts",
