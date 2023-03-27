@@ -21,12 +21,12 @@ type retryDoer struct {
 // NewRetryDoer has the default implementation of the client Do strategy, implementing
 // an exponential backoff algorithm.
 //
-// RetryAttempts: type uint specifys the amount of retries attempts
+// RetryAttempts: type uint specifies the amount of retries attempts
 //
-// BackoffInterval: type uint specifys the behind backoff interval in miliseconds
+// BackoffInterval: type uint specifies the behind backoff interval in milliseconds
 // and is to use progressively exponential longer waits between retries for consecutive error responses
 //
-// MaximumJitterInterval: type uint specifys the maximum jitter interval (randomized delay) in miliseconds to prevent successive collisions
+// MaximumJitterInterval: type uint specifys the maximum jitter interval (randomized delay) in milliseconds to prevent successive collisions
 // use in the exponential backoff interval algorithm
 //
 // Retries is consider default if any of the params is set to its zero/empty value, so it will not retry

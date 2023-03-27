@@ -6,10 +6,9 @@ LinkedIn: https://www.linkedin.com/in/mbenedit/
 
 # Considerations
 
-"should not - Implement client-side validation.":se asume que tras la regla no se relizaran validaciones de ningun tipo. Esto lo interpreto como tambien server-side validation de los campos requeridos, dejando a la fake api correr dichas validaciones. En el caso mas simple de Fetch(id string) con uuid, realizaria la mas basica validacion (que una valid uuid)  para evitar el request pero dada mi asumption no se llevaran a cabo. 
+- "should not - Implement client-side validation.":it is assumed that no validations of any kind will be performed and I interpret this as server-side validation of the required fields, leaving the fake api to run those validations. In the simplest case of Fetch(id string) with uuid, I would perform the most basic validation (that a valid uuid) to avoid the request but given my assumption it will not be performed.
 
-- errors normalization
-
+Thanks a lot for your time
 
 # Form3 Take Home Exercise
 Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 

@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	baseURL = "http://localhost:8080/v1/organisation/accounts"
+	baseURL = "http://accountapi:8080/v1/organisation/accounts"
 )
 
 func TestFetch_WhenEmptyIDs_ThenFailsWithBadRequest(t *testing.T) {

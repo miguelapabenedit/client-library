@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	baseURL = "http://localhost:8080/v1/organisation/accounts"
+	baseURL = "http://accountapi:8080/v1/organisation/accounts"
 )
 
 const (
@@ -44,7 +44,7 @@ type Client struct {
 // information please visit ./client_options file.
 //
 // Default settings will be applied if no options are injected, and
-// only does selected will be applied leaving the rest as default.
+// only selected will be applied leaving the rest as default.
 func NewClient(options ...ClientOption) Client {
 	c := Client{
 		client: http.Client{},
@@ -143,7 +143,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 //
 // account  (AccountRequest) account contains the basic and optional data for the register of a new account.
 //
-// If the resource is successfuly created the func will return an (Account) object with the base information.
+// If the resource is successfully created the func will return an (Account) object with the base information.
 //
 // Errors related to the request  will be of type
 // RequestError, while server side errors will be of type error.
@@ -175,12 +175,12 @@ func containsOnlyBlanks(value string) bool {
 }
 
 func makeJSONRequest(method, path string, body interface{}) (*http.Request, error) {
-	content, err := json.Marshal(body)
+	payload, err := json.Marshal(body)
 	if err != nil {
 		return nil, ErrSerializeRequest
 	}
 
-	req, err := http.NewRequest(method, path, bytes.NewReader(content))
+	req, err := http.NewRequest(method, path, bytes.NewReader(payload))
 	if err != nil {
 		return nil, err
 	}
