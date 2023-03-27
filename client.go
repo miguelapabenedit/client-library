@@ -148,7 +148,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 // Errors related to the request  will be of type
 // RequestError, while server side errors will be of type error.
 func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, error) {
-	req, err := makeJSONRequest(http.MethodPost, baseURL, account)
+	req, err := makeJSONRequest(http.MethodPost, baseURL, CreateAccountRequest{account})
 	if err != nil {
 		return Account{}, err
 	}

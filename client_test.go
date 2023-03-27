@@ -141,7 +141,7 @@ func TestFetch_WhenAccountFound_ThenSucceessWithAccountDetail(t *testing.T) {
 		expReqURL  = fmt.Sprintf("%s/%s", baseURL, testAccountID)
 		expAccount = f3Client.Account{
 			ID:             testAccountID,
-			OrganizationID: uuid.NewString(),
+			OrganisationID: uuid.NewString(),
 			Type:           "accounts",
 			Version:        0,
 			AccountAttributes: f3Client.AccountAttributes{
@@ -361,7 +361,7 @@ func TestCreate_WhenAccountCreated_ThenSuccess(t *testing.T) {
 			Links: f3Client.Links{Self: fmt.Sprintf("%s/%s", baseURL, accountID)},
 			Account: f3Client.Account{
 				ID:             accountID,
-				OrganizationID: req.OrganisationID,
+				OrganisationID: req.OrganisationID,
 				Type:           req.Type,
 				Version:        0,
 				AccountAttributes: f3Client.AccountAttributes{
@@ -375,7 +375,7 @@ func TestCreate_WhenAccountCreated_ThenSuccess(t *testing.T) {
 		expReqURL  = baseURL
 		expAccount = f3Client.Account{
 			ID:             accountID,
-			OrganizationID: accountResp.Account.OrganizationID,
+			OrganisationID: accountResp.Account.OrganisationID,
 			Type:           accountResp.Account.Type,
 			Version:        accountResp.Account.Version,
 			AccountAttributes: f3Client.AccountAttributes{

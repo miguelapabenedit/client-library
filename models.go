@@ -43,7 +43,7 @@ type AccountResponse struct {
 
 type Account struct {
 	ID                string            `json:"id"`
-	OrganizationID    string            `json:"organization_id"`
+	OrganisationID    string            `json:"organisation_id"`
 	Type              string            `json:"type"`
 	Version           int               `json:"version"`
 	AccountAttributes AccountAttributes `json:"attributes"`

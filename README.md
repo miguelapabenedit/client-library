@@ -6,10 +6,9 @@ LinkedIn: https://www.linkedin.com/in/mbenedit/
 
 # Considerations
 
-"should not - Implement client-side validation.":se asume que tras la regla no se relizaran validaciones de ningun tipo. Esto lo interpreto como tambien server-side validation de los campos requeridos, dejando a la fake api correr dichas validaciones. En el caso mas simple de Fetch(id string) con uuid, realizaria la mas basica validacion (que una valid uuid)  para evitar el request pero dada mi asumption no se llevaran a cabo.
+"should not - Implement client-side validation.":se asume que tras la regla no se relizaran validaciones de ningun tipo. Esto lo interpreto como tambien server-side validation de los campos requeridos, dejando a la fake api correr dichas validaciones. En el caso mas simple de Fetch(id string) con uuid, realizaria la mas basica validacion (que una valid uuid)  para evitar el request pero dada mi asumption no se llevaran a cabo. 
 
-- retrier 
-
+- errors normalization
 
 
 # Form3 Take Home Exercise

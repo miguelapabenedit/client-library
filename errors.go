@@ -21,21 +21,21 @@ func (re RequestError) Error() string {
 var (
 	// ErrUnmarshalInvalidValue signals that the recieved JSON value
 	// could not be converted to its selected interface using json.Unmarshal.
-	ErrUnmarshalInvalidValue = errors.New("invalid unmarshal JSON value.")
+	ErrUnmarshalInvalidValue = errors.New("invalid unmarshal JSON value")
 
-	// ErrRetryRequest signals the failure to execute the request and the
+	// ErrRetryLimit signals the failure to execute the request and the
 	// limit of retry attempts was reached.
-	ErrRetryRequest = errors.New("unable to execute request, retry attempts reached.")
+	ErrRetryLimit = errors.New("unable to execute request, retry attempts reached")
 
 	// ErrSerializeRequest signals the failure while trying to encode an object with
 	// json.Marshal operation.
-	ErrSerializeRequest = errors.New("an error happend while trying to serialize.")
+	ErrSerializeRequest = errors.New("an error happend while trying to serialize")
 
 	// ErrRequiredID signals that in order to continue the user must provide and id that doesn't
 	// contain only blanks.
 	ErrRequiredID = RequestError{
 		StatusCode: http.StatusBadRequest,
-		Err:        errors.New("an id must be provided and can't contain only blanks."),
+		Err:        errors.New("an id must be provided and can't contain only blanks"),
 	}
 
 	// ErrTimeout signals that the request was cancel do to reach the specified timeout,
@@ -45,10 +45,10 @@ var (
 
 	// ErrRecordNotFound signals that the requested resource is not available or does not
 	// exist.
-	ErrRecordNotFound = errors.New("record does not exist.")
+	ErrRecordNotFound = errors.New("record does not exist")
 
 	// ErrClientInternal signals that during the execution of the request an error
-	// was encounter, preventing for any retry attempts.
+	// was encountered, preventing for any retry attempts.
 	ErrClientInternal = errors.New("client doer internal error")
 )
 

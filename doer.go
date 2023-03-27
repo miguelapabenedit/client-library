@@ -65,7 +65,7 @@ func (r retryDoer) Do(client http.Client, req *http.Request) (resp *http.Respons
 	}
 
 	if retries == r.retryAttempts {
-		return resp, ErrRetryRequest
+		return resp, ErrRetryLimit
 	}
 
 	return resp, err

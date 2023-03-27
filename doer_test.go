@@ -54,7 +54,7 @@ func TestDo_WhenRequestErrAndRetryLimitReached_ThenFails(t *testing.T) {
 
 	resp, err := doer.Do(http.Client{}, req)
 
-	assert.EqualError(t, err, f3Client.ErrRetryRequest.Error())
+	assert.EqualError(t, err, f3Client.ErrRetryLimit.Error())
 	assert.Nil(t, resp)
 }
 
