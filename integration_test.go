@@ -18,10 +18,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestBasicIntegrSettingFuncs runs the basic test helper create,delete and fetch funcs used
+// TestIntegration_BasicSettingFuncs runs the basic test helper create,delete and fetch funcs used
 // in the integration tests. If any non contemplated error is encountered
 // in the execution or data is not clear,the flow will panic preventing any further tests.
-func TestBasicIntegrationSettingFuncs(t *testing.T) {
+func TestIntegration_BasicSettingFuncs(t *testing.T) {
 	client := f3Client.NewClient()
 
 	accountID := createTestAccount(&client).ID

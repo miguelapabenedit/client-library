@@ -1,8 +1,8 @@
 
 # Candidate
+Name: Miguel Benedit.
 
-Name: Miguel Benedit 
-LinkedIn: https://www.linkedin.com/in/mbenedit/
+LinkedIn: https://www.linkedin.com/in/mbenedit/.
 
 # Considerations
 
