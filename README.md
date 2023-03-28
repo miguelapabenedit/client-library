@@ -6,6 +6,8 @@ LinkedIn: https://www.linkedin.com/in/mbenedit/.
 
 # Considerations
 
+- Before starting this test, I decided to timebox the development to one week during my spare time. I am sure it can be improved, and I would love to hear your comments or talk about any part of it.
+
 - "should not - Implement client-side validation.":it is assumed that no validations of any kind will be performed and I interpret this as server-side validation of the required fields, leaving the fake api to run those validations. In the simplest case of Fetch(id string) with uuid, I would perform the most basic validation (that a valid uuid) to avoid the request but given my assumption it will not be performed.
 
 Thanks a lot for your time
