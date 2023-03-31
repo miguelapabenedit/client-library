@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -19,7 +18,7 @@ func (re RequestError) Error() string {
 }
 
 var (
-	// ErrUnmarshalInvalidValue signals that the recieved JSON value
+	// ErrUnmarshalInvalidValue signals that the received JSON value
 	// could not be converted to its selected interface using json.Unmarshal.
 	ErrUnmarshalInvalidValue = errors.New("invalid unmarshal JSON value")
 
@@ -29,7 +28,7 @@ var (
 
 	// ErrSerializeRequest signals the failure while trying to encode an object with
 	// json.Marshal operation.
-	ErrSerializeRequest = errors.New("an error happend while trying to serialize")
+	ErrSerializeRequest = errors.New("an error happened while trying to serialize")
 
 	// ErrRequiredID signals that in order to continue the user must provide and id that doesn't
 	// contain only blanks.
@@ -46,19 +45,7 @@ var (
 	// ErrRecordNotFound signals that the requested resource is not available or does not
 	// exist.
 	ErrRecordNotFound = errors.New("record does not exist")
-
-	// ErrClientInternal signals that during the execution of the request an error
-	// was encountered, preventing for any retry attempts.
-	ErrClientInternal = errors.New("client doer internal error")
 )
-
-func handleClientError(err error) error {
-	if os.IsTimeout(err) {
-		return ErrTimeout
-	}
-
-	return ErrClientInternal
-}
 
 func handleResponseError(resp *http.Response) error {
 	var respErr ResponseError

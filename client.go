@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
 
 const (
-	baseURL = "http://accountapi:8080/v1/organisation/accounts"
+	accountsPath = "/v1/organisation/accounts"
 )
 
 const (
@@ -33,8 +34,9 @@ type Doer interface {
 // To use it, create an instance with NewClient, the zero value of this Client
 // is not safe to use.
 type Client struct {
-	client http.Client
-	doer   Doer
+	client  http.Client
+	doer    Doer
+	baseURL string
 }
 
 // NewClient is the only way to properly instantiate a Form3 Client.
@@ -46,11 +48,12 @@ type Client struct {
 // Default settings will be applied if no options are injected, and
 // only selected will be applied leaving the rest as default.
 func NewClient(options ...ClientOption) Client {
-	c := Client{
+	client := Client{
 		client: http.Client{},
 	}
 
 	var defaultOptions = []ClientOption{
+		BaseURL("http://accountapi:8080"),
 		Timeout(2 * time.Second),
 		Retries(2, 2250, 150),
 	}
@@ -58,10 +61,10 @@ func NewClient(options ...ClientOption) Client {
 	options = append(defaultOptions, options...)
 
 	for _, option := range options {
-		c = option(c)
+		client = option(client)
 	}
 
-	return c
+	return client
 }
 
 // Fetch allows to retrieve an account resource by its identifier providing:
@@ -80,16 +83,16 @@ func (c *Client) Fetch(ctx context.Context, id string) (Account, error) {
 		return Account{}, ErrRequiredID
 	}
 
-	path := fmt.Sprintf("%s/%s", baseURL, id)
-	req, err := makeJSONRequest(http.MethodGet, path, nil)
+	req, err := c.makeJSONRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", accountsPath, id), nil)
 	if err != nil {
 		return Account{}, err
 	}
 
 	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
-		return Account{}, handleClientError(err)
+		return Account{}, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return Account{}, handleResponseError(resp)
@@ -119,16 +122,16 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 		return ErrRequiredID
 	}
 
-	path := fmt.Sprintf("%s/%s?version=0", baseURL, id)
-	req, err := makeJSONRequest(http.MethodDelete, path, nil)
+	req, err := c.makeJSONRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=0", accountsPath, id), nil)
 	if err != nil {
 		return err
 	}
 
 	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
-		return handleClientError(err)
+		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
 		return handleResponseError(resp)
@@ -148,15 +151,16 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 // Errors related to the request  will be of type
 // RequestError, while server side errors will be of type error.
 func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, error) {
-	req, err := makeJSONRequest(http.MethodPost, baseURL, CreateAccountRequest{account})
+	req, err := c.makeJSONRequest(ctx, http.MethodPost, accountsPath, CreateAccountRequest{account})
 	if err != nil {
 		return Account{}, err
 	}
 
 	resp, err := c.doer.Do(c.client, req)
 	if err != nil {
-		return Account{}, handleClientError(err)
+		return Account{}, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
 		return Account{}, handleResponseError(resp)
@@ -170,17 +174,26 @@ func (c *Client) Create(ctx context.Context, account AccountRequest) (Account, e
 	return rData.Account, nil
 }
 
+func (c *Client) resolveURL(path string) (*url.URL, error) {
+	return url.Parse(c.baseURL + path)
+}
+
 func containsOnlyBlanks(value string) bool {
 	return len(strings.TrimSpace(value)) == 0
 }
 
-func makeJSONRequest(method, path string, body interface{}) (*http.Request, error) {
+func (c *Client) makeJSONRequest(ctx context.Context, method, path string, body interface{}) (*http.Request, error) {
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return nil, ErrSerializeRequest
 	}
 
-	req, err := http.NewRequest(method, path, bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, method, path, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.URL, err = c.resolveURL(path)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +205,7 @@ func makeJSONRequest(method, path string, body interface{}) (*http.Request, erro
 	return req, nil
 }
 
-func unmarshalBody(body io.Reader, v any) error {
+func unmarshalBody(body io.Reader, value any) error {
 	content, err := io.ReadAll(body)
 	if err != nil {
 		return err
@@ -202,7 +215,7 @@ func unmarshalBody(body io.Reader, v any) error {
 		return nil
 	}
 
-	if err := json.Unmarshal(content, &v); err != nil {
+	if err := json.Unmarshal(content, &value); err != nil {
 		return ErrUnmarshalInvalidValue
 	}
 

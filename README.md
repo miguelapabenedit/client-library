@@ -1,17 +1,3 @@
-
-# Candidate
-Name: Miguel Benedit.
-
-LinkedIn: https://www.linkedin.com/in/mbenedit/.
-
-# Considerations
-
-- Before starting this test, I decided to timebox the development to one week during my spare time. I am sure it can be improved, and I would love to hear your comments or talk about any part of it.
-
-- "should not - Implement client-side validation.":it is assumed that no validations of any kind will be performed and I interpret this as server-side validation of the required fields, leaving the fake api to run those validations. In the simplest case of Fetch(id string) with uuid, I would perform the most basic validation (that a valid uuid) to avoid the request but given my assumption it will not be performed.
-
-Thanks a lot for your time
-
 # Form3 Take Home Exercise
 Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 
 

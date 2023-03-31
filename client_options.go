@@ -12,6 +12,15 @@ import (
 // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 type ClientOption func(Client) Client
 
+// BaseURL specifies base URL where request are made and
+// by default an api base url is selected.
+func BaseURL(url string) ClientOption {
+	return func(c Client) Client {
+		c.baseURL = url
+		return c
+	}
+}
+
 // Timeout specifies a time limit for requests made by the Client.
 //
 // The timeout includes connection time, any redirects, and reading
