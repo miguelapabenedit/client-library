@@ -1,5 +1,5 @@
 # Form3 Take Home Exercise
-Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 
+Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizarCancel changesdry). 
 
 ## Instructions
 The goal of this exercise is to write a client library in Go to access our fake account API, which is provided as a Docker
@@ -39,13 +39,6 @@ The finished solution **should not:**
 - Be a command line client or other type of program - the requirement is to write a client library.
 - Implement the `List` operation.
 > We give no credit for including any of the above in a submitted test, so please only focus on the "Shoulds" above.
-
-## How to submit your exercise
-
-- Include your name in the README. If you are new to Go, please also mention this in the README so that we can consider this when reviewing your exercise
-- Create a private [GitHub](https://help.github.com/en/articles/create-a-repo) repository, by copying all files you deem necessary for your submission
-- [Invite](https://help.github.com/en/articles/inviting-collaborators-to-a-personal-repository) [@form3tech-interviewer-1](https://github.com/form3tech-interviewer-1) to your private repo
-- Let us know you've completed the exercise using the link provided at the bottom of the email from our recruitment team
 
 ## License
 
