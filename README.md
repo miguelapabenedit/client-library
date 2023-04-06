@@ -1,10 +1,10 @@
-# Form3 Take Home Exercise
-Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizarCancel changesdry). 
+#Take Home Exercise
+Engineers at X build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizarCancel changesdry). 
 
 ## Instructions
 The goal of this exercise is to write a client library in Go to access our fake account API, which is provided as a Docker
 container in the file `docker-compose.yaml` of this repository. Please refer to the
-[Form3 documentation](https://www.api-docs.form3.tech/api/tutorials/getting-started/create-an-account) for information on how to interact with the API. Please note that the fake account API does not require any authorisation or authentication.
+[X documentation](https://www.api-docs.form3.tech/api/tutorials/getting-started/create-an-account) for information on how to interact with the API. Please note that the fake account API does not require any authorisation or authentication.
 
 A mapping of account attributes can be found in [models.go](./models.go). Can be used as a starting point, usage of the file is not required.
 
@@ -39,14 +39,3 @@ The finished solution **should not:**
 - Be a command line client or other type of program - the requirement is to write a client library.
 - Implement the `List` operation.
 > We give no credit for including any of the above in a submitted test, so please only focus on the "Shoulds" above.
-
-## License
-
-Copyright 2019-2022 Form3 Financial Cloud
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
